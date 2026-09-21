@@ -12,6 +12,10 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_SQLITE_PATH = DATA_DIR / "proofpath.db"
 
 
+UPLOAD_DIR_DEFAULT = DATA_DIR / "uploads"
+UPLOAD_DIR_DEFAULT.mkdir(parents=True, exist_ok=True)
+
+
 class Settings(BaseSettings):
     DEMO_MODE: bool = True
     DATABASE_URL: str = f"sqlite:///{DEFAULT_SQLITE_PATH}"
@@ -25,6 +29,11 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://127.0.0.1:8081"
     ]
+    UPLOAD_DIR: Path = UPLOAD_DIR_DEFAULT
+    MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
+    ALLOWED_EXTENSIONS: List[str] = [".pdf", ".jpg", ".jpeg", ".png"]
+    ALLOWED_MIME_TYPES: List[str] = ["application/pdf", "image/jpeg", "image/png"]
+    TESSERACT_CMD: Union[str, None] = None
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

@@ -30,10 +30,11 @@ wheels/
 .coverage
 htmlcov/
 
-# Databases
+# Databases & Uploads
 data/*.db
 data/*.sqlite
 data/*.sqlite3
+data/uploads/
 !data/.gitkeep
 
 # Logs
