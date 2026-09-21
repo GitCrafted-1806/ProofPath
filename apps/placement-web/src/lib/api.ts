@@ -1,13 +1,15 @@
 import axios, { AxiosError } from "axios";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000,
+  timeout: 60000,
 });
 
 // Request interceptor to attach JWT
@@ -37,10 +39,10 @@ export function formatApiError(error: unknown): string {
       }
     }
     if (err.code === "ECONNABORTED") {
-      return "Connection timed out. The backend server might be unresponsive.";
+      return "Connection timed out. The backend server might be starting up (Render free-tier cold start can take up to 60s). Please try again.";
     }
     if (err.code === "ERR_NETWORK" || !err.response) {
-      return "Cannot connect to ProofPath FastAPI server (127.0.0.1:8000). Please ensure the backend is running.";
+      return `Cannot connect to ProofPath API server (${API_BASE_URL}). Please ensure the backend is running and CORS is permitted.`;
     }
     if (err.response?.status === 401) {
       return "Session expired or invalid credentials. Please log in again.";
