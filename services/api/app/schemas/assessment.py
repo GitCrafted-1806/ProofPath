@@ -42,9 +42,27 @@ class AssessmentTakeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+from pydantic import field_validator
+
+
 class AssessmentSubmitRequest(BaseModel):
     """Student submission payload."""
     answers: Dict[str, Any] = Field(..., description="Mapping of question id to submitted answer")
+
+    @field_validator("answers")
+    @classmethod
+    def check_answers(cls, v):
+        if not isinstance(v, dict):
+            raise ValueError("Answers payload must be a dictionary.")
+        if len(v) > 50:
+            raise ValueError("Answers payload contains too many items (maximum 50).")
+        for q_id, ans in v.items():
+            if not isinstance(q_id, str) or len(q_id) < 1 or len(q_id) > 100:
+                raise ValueError("Invalid question ID format.")
+            if isinstance(ans, str) and len(ans) > 500:
+                raise ValueError(f"Answer for question '{q_id}' exceeds maximum length of 500 characters.")
+        return v
+
 
 
 class QuestionResultFeedback(BaseModel):

@@ -21,6 +21,10 @@ from app.schemas.assessment import (
     SkillAssessmentAvailabilityResponse,
     AssessmentHistoryItemResponse,
 )
+from app.schemas.placement import (
+    AssessmentRequestCoordinatorPayload,
+    AssessmentRequestCoordinatorResponse,
+)
 from app.services.assessment_service import (
     get_assessment_questions,
     mask_questions_for_client,
@@ -474,4 +478,122 @@ def get_assessment_details(
         completed_at=assessment.completed_at or assessment.created_at,
         feedback=[QuestionResultFeedback(**f) for f in feedback_raw],
         new_skill_status=current_status,
+    )
+
+
+@router.post("/request", response_model=AssessmentRequestCoordinatorResponse, status_code=status.HTTP_201_CREATED)
+def request_assessment_by_coordinator(
+    payload: AssessmentRequestCoordinatorPayload,
+    current_user: User = Depends(require_coordinator),
+    db: Session = Depends(get_db),
+):
+    """
+    Placement Coordinator endpoint to explicitly request/assign an assessment for a student.
+    Enables coordinators to test candidate readiness.
+    Creates a PENDING assessment and generates an audit log.
+    """
+    profile = db.query(StudentProfile).filter(StudentProfile.id == payload.student_id).first()
+    if not profile:
+        profile = db.query(StudentProfile).filter(StudentProfile.user_id == payload.student_id).first()
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student profile for ID '{payload.student_id}' not found.",
+        )
+
+    skill = db.query(Skill).filter(Skill.id == payload.skill_id).first()
+    if not skill:
+        skill = db.query(Skill).filter(Skill.name.ilike(payload.skill_id)).first()
+
+    if not skill:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Skill with ID or name '{payload.skill_id}' not found.",
+        )
+
+    req_type = payload.type.strip().upper()
+    if req_type not in ("PRACTICAL", "FOLLOW_UP"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid assessment type '{payload.type}'. Must be 'PRACTICAL' or 'FOLLOW_UP'.",
+        )
+
+    # Ensure StudentSkill record exists
+    student_skill = db.query(StudentSkill).filter(
+        StudentSkill.student_id == profile.id,
+        StudentSkill.skill_id == skill.id,
+    ).first()
+    if not student_skill:
+        student_skill = StudentSkill(
+            student_id=profile.id,
+            skill_id=skill.id,
+            verification_status=SkillVerificationStatus.UNVERIFIED,
+        )
+        db.add(student_skill)
+        db.commit()
+
+    # Check for existing pending assessment
+    existing_pending = db.query(Assessment).filter(
+        Assessment.student_id == profile.id,
+        Assessment.skill_id == skill.id,
+        Assessment.type == req_type,
+        Assessment.status == "PENDING",
+    ).first()
+    if existing_pending:
+        return AssessmentRequestCoordinatorResponse(
+            status="ALREADY_PENDING",
+            message=f"A {req_type} assessment is already pending for student {profile.full_name}.",
+            assessment_id=existing_pending.id,
+            student_id=profile.id,
+            skill_id=skill.id,
+            type=req_type,
+        )
+
+    # Check if already passed
+    already_passed = db.query(Assessment).filter(
+        Assessment.student_id == profile.id,
+        Assessment.skill_id == skill.id,
+        Assessment.type == req_type,
+        Assessment.passed == True,
+    ).first()
+    if already_passed:
+        return AssessmentRequestCoordinatorResponse(
+            status="ALREADY_PASSED",
+            message=f"Student {profile.full_name} has already passed the {req_type} assessment for {skill.name}.",
+            assessment_id=already_passed.id,
+            student_id=profile.id,
+            skill_id=skill.id,
+            type=req_type,
+        )
+
+    # Load questions
+    raw_questions = get_assessment_questions(skill.name, req_type)
+
+    assessment = Assessment(
+        student_id=profile.id,
+        skill_id=skill.id,
+        type=req_type,
+        status="PENDING",
+        questions=raw_questions,
+    )
+    db.add(assessment)
+
+    # Audit log
+    audit = AuditLog(
+        user_id=current_user.id,
+        action="ASSESSMENT_REQUESTED_BY_COORDINATOR",
+        details=f"Coordinator {current_user.email} requested {req_type} assessment on {skill.name} for student {profile.full_name} ({profile.id})"
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(assessment)
+
+    return AssessmentRequestCoordinatorResponse(
+        status="SUCCESS",
+        message=f"{req_type} assessment on {skill.name} successfully requested for {profile.full_name}.",
+        assessment_id=assessment.id,
+        student_id=profile.id,
+        skill_id=skill.id,
+        type=req_type,
     )

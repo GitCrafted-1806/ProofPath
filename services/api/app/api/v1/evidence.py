@@ -137,6 +137,33 @@ def get_my_evidence(
     return evidences
 
 
+@router.get("/student/{student_id}", response_model=List[EvidenceResponse])
+def get_student_evidence(
+    student_id: str,
+    current_user: User = Depends(require_coordinator),
+    db: Session = Depends(get_db)
+):
+    """
+    Placement Coordinator endpoint to retrieve all evidence submitted by any student.
+    Accepts student profile id or user id.
+    """
+    profile = db.query(StudentProfile).filter(StudentProfile.id == student_id).first()
+    if not profile:
+        profile = db.query(StudentProfile).filter(StudentProfile.user_id == student_id).first()
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student profile with ID '{student_id}' not found."
+        )
+
+    evidences = db.query(Evidence).filter(
+        Evidence.student_id == profile.id
+    ).order_by(Evidence.created_at.desc()).all()
+
+    return evidences
+
+
 @router.get("/{evidence_id}", response_model=EvidenceDetailResponse)
 def get_evidence_by_id(
     evidence_id: str,

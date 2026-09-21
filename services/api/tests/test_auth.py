@@ -108,3 +108,69 @@ def test_auth_me_with_valid_token(client):
     me_data = me_res.json()
     assert me_data["email"] == "me_test@example.com"
     assert me_data["role"] == "PLACEMENT_COORDINATOR"
+
+
+def test_student_registration_with_cgpa_and_claimed_skills(client):
+    """
+    Test student onboarding with explicit CGPA and claimed MVP skills.
+    Ensures submitted CGPA persists and claimed skills start strictly UNVERIFIED.
+    """
+    payload = {
+        "email": "onboarding_student@college.edu",
+        "password": "Password123!",
+        "role": "STUDENT",
+        "full_name": "Priya Sharma",
+        "college_name": "Birla Institute of Technology",
+        "branch": "Information Technology",
+        "academic_year": 2027,
+        "cgpa": 8.75,
+        "skills": ["Python", "Pandas"],
+    }
+    reg_res = client.post("/api/v1/auth/register", json=payload)
+    assert reg_res.status_code == 201
+
+    login_res = client.post("/api/v1/auth/login", json={
+        "email": "onboarding_student@college.edu",
+        "password": "Password123!"
+    })
+    assert login_res.status_code == 200
+    token = login_res.json()["access_token"]
+
+    profile_res = client.get(
+        "/api/v1/students/me",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert profile_res.status_code == 200
+    pdata = profile_res.json()
+
+    assert pdata["full_name"] == "Priya Sharma"
+    assert pdata["college_name"] == "Birla Institute of Technology"
+    assert pdata["branch"] == "Information Technology"
+    assert pdata["academic_year"] == 2027
+    assert pdata["cgpa"] == 8.75
+
+    # Check skills
+    claimed_skill_names = [s["skill_name"] for s in pdata["skills"]]
+    assert "Python" in claimed_skill_names
+    assert "Pandas" in claimed_skill_names
+    assert "Matplotlib" not in claimed_skill_names
+    assert "Git/GitHub" not in claimed_skill_names
+
+    # Critical Verification Rule: all claimed skills MUST start UNVERIFIED
+    for skill in pdata["skills"]:
+        assert skill["verification_status"] == "UNVERIFIED", (
+            f"Skill {skill['skill_name']} must start UNVERIFIED, got {skill['verification_status']}"
+        )
+
+
+def test_student_registration_invalid_cgpa_rejected(client):
+    """Test CGPA validation rejects values outside 0-10 range."""
+    payload = {
+        "email": "bad_cgpa@college.edu",
+        "password": "Password123!",
+        "role": "STUDENT",
+        "cgpa": 12.5,
+    }
+    res = client.post("/api/v1/auth/register", json=payload)
+    assert res.status_code == 422
+

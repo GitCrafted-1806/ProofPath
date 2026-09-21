@@ -1,6 +1,11 @@
 from app.schemas.common import MessageResponse
 from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse
-from app.schemas.student import StudentSkillResponse, StudentProfileResponse
+from app.schemas.student import (
+    StudentSkillResponse,
+    StudentProfileResponse,
+    StudentProfileUpdateRequest,
+    PublicStudentProfileResponse,
+)
 from app.schemas.evidence import (
     EvidenceUploadType,
     EvidenceMetadataSchema,
@@ -35,6 +40,8 @@ __all__ = [
     "UserResponse",
     "StudentSkillResponse",
     "StudentProfileResponse",
+    "StudentProfileUpdateRequest",
+    "PublicStudentProfileResponse",
     "EvidenceUploadType",
     "EvidenceMetadataSchema",
     "EvidenceResponse",

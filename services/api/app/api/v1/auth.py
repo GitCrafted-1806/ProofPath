@@ -33,8 +33,9 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.flush()
 
-    # If student, initialize profile and default unverified skill records
+    # If student, initialize profile and claimed unverified skill records
     if req.role == UserRole.STUDENT:
+        cgpa_val = req.cgpa if req.cgpa is not None else 0.0
         profile = StudentProfile(
             user_id=user.id,
             full_name=req.full_name or "New Student",
@@ -42,22 +43,32 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
             college_name=req.college_name or "College of Engineering",
             branch=req.branch or "CSE",
             academic_year=req.academic_year or 2026,
-            cgpa=req.cgpa or 0.0,
+            cgpa=cgpa_val,
             is_public=True
         )
         db.add(profile)
         db.flush()
 
-        # Seed the 4 MVP skills into StudentSkill (initially UNVERIFIED)
-        for skill_name in MVP_SKILLS:
-            skill = db.query(Skill).filter(Skill.name == skill_name).first()
+        # Seed claimed MVP skills into StudentSkill (strictly UNVERIFIED)
+        if req.skills is not None:
+            target_skills = [s.strip() for s in req.skills if s and s.strip() in MVP_SKILLS]
+        else:
+            target_skills = MVP_SKILLS
+
+        for skill_name in target_skills:
+            skill = db.query(Skill).filter(Skill.name.ilike(skill_name)).first()
             if skill:
-                student_skill = StudentSkill(
-                    student_id=profile.id,
-                    skill_id=skill.id,
-                    verification_status=SkillVerificationStatus.UNVERIFIED
-                )
-                db.add(student_skill)
+                existing_ss = db.query(StudentSkill).filter(
+                    StudentSkill.student_id == profile.id,
+                    StudentSkill.skill_id == skill.id
+                ).first()
+                if not existing_ss:
+                    student_skill = StudentSkill(
+                        student_id=profile.id,
+                        skill_id=skill.id,
+                        verification_status=SkillVerificationStatus.UNVERIFIED
+                    )
+                    db.add(student_skill)
 
     # Record audit log
     audit = AuditLog(
