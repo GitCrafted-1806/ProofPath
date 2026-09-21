@@ -8,6 +8,13 @@ from app.schemas.evidence import (
     EvidenceDetailResponse,
     EvidenceVerifyRequest,
 )
+from app.schemas.github import (
+    GitHubConnectionStatusResponse,
+    GitHubOAuthStartResponse,
+    GitHubRepositoryResponse,
+    GitHubRepoSelectRequest,
+    GitHubRepoEvidenceResponse,
+)
 
 __all__ = [
     "MessageResponse",
@@ -22,4 +29,9 @@ __all__ = [
     "EvidenceResponse",
     "EvidenceDetailResponse",
     "EvidenceVerifyRequest",
+    "GitHubConnectionStatusResponse",
+    "GitHubOAuthStartResponse",
+    "GitHubRepositoryResponse",
+    "GitHubRepoSelectRequest",
+    "GitHubRepoEvidenceResponse",
 ]

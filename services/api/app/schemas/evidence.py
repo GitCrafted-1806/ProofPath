@@ -33,6 +33,7 @@ class EvidenceResponse(BaseModel):
     id: str
     student_id: str
     type: EvidenceType
+    file_path: Optional[str] = None
     original_filename: Optional[str] = None
     authenticity_state: AuthenticityState
     extracted_metadata: Dict[str, Any] = Field(default_factory=dict)

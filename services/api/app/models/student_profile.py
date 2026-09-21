@@ -37,3 +37,4 @@ class StudentProfile(Base):
     skills = relationship("StudentSkill", back_populates="student", cascade="all, delete-orphan")
     evidence = relationship("Evidence", back_populates="student", cascade="all, delete-orphan")
     assessments = relationship("Assessment", back_populates="student", cascade="all, delete-orphan")
+    github_account = relationship("GitHubAccount", back_populates="student", uselist=False, cascade="all, delete-orphan")

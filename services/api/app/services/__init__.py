@@ -25,6 +25,16 @@ from app.services.skill_mapper import (
 from app.services.metadata_extractor import (
     extract_document_metadata,
 )
+from app.services.github_service import (
+    create_oauth_state,
+    validate_oauth_state,
+    exchange_code_for_token,
+    fetch_student_repositories,
+    fetch_repository_details,
+)
+from app.services.github_analyzer import (
+    analyze_repository_evidence,
+)
 
 __all__ = [
     "compute_skill_status",
@@ -41,4 +51,10 @@ __all__ = [
     "normalize_document_text",
     "map_skills_from_text",
     "extract_document_metadata",
+    "create_oauth_state",
+    "validate_oauth_state",
+    "exchange_code_for_token",
+    "fetch_student_repositories",
+    "fetch_repository_details",
+    "analyze_repository_evidence",
 ]

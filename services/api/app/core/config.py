@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     ALLOWED_MIME_TYPES: List[str] = ["application/pdf", "image/jpeg", "image/png"]
     TESSERACT_CMD: Union[str, None] = None
 
+    # GitHub OAuth & API Configuration
+    GITHUB_CLIENT_ID: Union[str, None] = None
+    GITHUB_CLIENT_SECRET: Union[str, None] = None
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/github/callback"
+    GITHUB_OAUTH_AUTHORIZE_URL: str = "https://github.com/login/oauth/authorize"
+    GITHUB_OAUTH_TOKEN_URL: str = "https://github.com/login/oauth/access_token"
+    GITHUB_API_BASE_URL: str = "https://api.github.com"
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
