@@ -15,6 +15,17 @@ from app.schemas.github import (
     GitHubRepoSelectRequest,
     GitHubRepoEvidenceResponse,
 )
+from app.schemas.assessment import (
+    QuestionType,
+    AssessmentQuestionClientSchema,
+    AssessmentStartRequest,
+    AssessmentTakeResponse,
+    AssessmentSubmitRequest,
+    QuestionResultFeedback,
+    AssessmentResultResponse,
+    SkillAssessmentAvailabilityResponse,
+    AssessmentHistoryItemResponse,
+)
 
 __all__ = [
     "MessageResponse",
@@ -34,4 +45,13 @@ __all__ = [
     "GitHubRepositoryResponse",
     "GitHubRepoSelectRequest",
     "GitHubRepoEvidenceResponse",
+    "QuestionType",
+    "AssessmentQuestionClientSchema",
+    "AssessmentStartRequest",
+    "AssessmentTakeResponse",
+    "AssessmentSubmitRequest",
+    "QuestionResultFeedback",
+    "AssessmentResultResponse",
+    "SkillAssessmentAvailabilityResponse",
+    "AssessmentHistoryItemResponse",
 ]

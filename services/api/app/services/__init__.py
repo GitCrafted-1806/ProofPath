@@ -32,8 +32,10 @@ from app.services.github_service import (
     fetch_student_repositories,
     fetch_repository_details,
 )
-from app.services.github_analyzer import (
-    analyze_repository_evidence,
+from app.services.assessment_service import (
+    get_assessment_questions,
+    mask_questions_for_client,
+    evaluate_assessment_submission,
 )
 
 __all__ = [
@@ -57,4 +59,7 @@ __all__ = [
     "fetch_student_repositories",
     "fetch_repository_details",
     "analyze_repository_evidence",
+    "get_assessment_questions",
+    "mask_questions_for_client",
+    "evaluate_assessment_submission",
 ]

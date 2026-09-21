@@ -32,3 +32,15 @@ def init_db() -> None:
     # Import all models so metadata is populated before create_all
     import app.models  # noqa: F401
     Base.metadata.create_all(bind=engine)
+
+    # Safe SQLite column migration for development environments
+    if settings.DATABASE_URL.startswith("sqlite"):
+        with engine.connect() as conn:
+            cursor = conn.exec_driver_sql("PRAGMA table_info(assessments)")
+            cols = [row[1] for row in cursor.fetchall()]
+            if cols:
+                if "questions" not in cols:
+                    conn.exec_driver_sql("ALTER TABLE assessments ADD COLUMN questions JSON DEFAULT '[]' NOT NULL")
+                if "submission" not in cols:
+                    conn.exec_driver_sql("ALTER TABLE assessments ADD COLUMN submission JSON DEFAULT '{}'")
+            conn.commit()

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, String, Float, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -13,6 +13,8 @@ class Assessment(Base):
     skill_id = Column(String(36), ForeignKey("skills.id", ondelete="CASCADE"), nullable=False)
     type = Column(String(50), default="PRACTICAL", nullable=False)  # PRACTICAL, FOLLOW_UP
     status = Column(String(50), default="PENDING", nullable=False)  # PENDING, COMPLETED, FAILED
+    questions = Column(JSON, default=list, nullable=False)
+    submission = Column(JSON, default=dict, nullable=True)
     score = Column(Float, nullable=True)
     passed = Column(Boolean, default=False, nullable=False)
     evaluation_summary = Column(String(1000), nullable=True)
