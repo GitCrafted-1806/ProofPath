@@ -69,7 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     setIsLoading(true);
     try {
-      const response = await api.post<{ access_token: string; role: string }>("/api/v1/auth/login", {
+      const response = await api.post<{
+        access_token: string;
+        role: "STUDENT" | "PLACEMENT_COORDINATOR";
+        user_id: string;
+        email: string;
+      }>("/api/v1/auth/login", {
         email,
         password,
       });
@@ -84,10 +89,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("proofpath_coordinator_token", authToken);
       setToken(authToken);
 
-      const meResp = await api.get<User>("/api/v1/auth/me", {
-        headers: { Authorization: `Bearer ${authToken}` },
+      // Populate user directly from login response, saving an entire sequential network round-trip
+      setUser({
+        id: response.data.user_id,
+        email: response.data.email,
+        role: response.data.role,
       });
-      setUser(meResp.data);
 
       router.push("/");
     } catch (err) {

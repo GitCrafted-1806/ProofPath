@@ -1,8 +1,15 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 export const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
 ).replace(/\/+$/, "");
+
+const MAX_RETRIES = 2;
+const RETRY_DELAY_BASE_MS = 1500;
+
+interface RetryConfig extends InternalAxiosRequestConfig {
+  _retryCount?: number;
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -26,6 +33,58 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+function isSafeToRetryRequest(config?: RetryConfig): boolean {
+  if (!config) return false;
+  const method = (config.method || "get").toUpperCase();
+  // Safe idempotent read operations
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
+    return true;
+  }
+  // Explicitly safe coordinator auth/login on cold-start (credential check only, no state mutation)
+  const url = config.url || "";
+  if (method === "POST" && url.includes("/auth/login")) {
+    return true;
+  }
+  // Never retry arbitrary state-changing mutations (requirement creation, assessment requests, verification)
+  return false;
+}
+
+function isRetryableError(error: AxiosError): boolean {
+  if (axios.isCancel(error)) {
+    return false;
+  }
+  // Network error (no response), timeout, or browser ERR_NETWORK
+  if (!error.response || error.code === "ECONNABORTED" || error.code === "ERR_NETWORK") {
+    return true;
+  }
+  // Gateway errors often returned by Render proxy during container spin-up
+  const status = error.response.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Response interceptor for transient cold-start / network failure retries
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as RetryConfig | undefined;
+
+    // Retry transient network or cold-start gateway failures only for safe requests
+    if (config && isSafeToRetryRequest(config) && isRetryableError(error)) {
+      const currentRetry = config._retryCount || 0;
+      if (currentRetry < MAX_RETRIES) {
+        config._retryCount = currentRetry + 1;
+        const waitMs = RETRY_DELAY_BASE_MS * (currentRetry + 1);
+        await delay(waitMs);
+        return api.request(config);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor for unified error formatting
 export function formatApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -39,10 +98,13 @@ export function formatApiError(error: unknown): string {
       }
     }
     if (err.code === "ECONNABORTED") {
-      return "Connection timed out. The backend server might be starting up (Render free-tier cold start can take up to 60s). Please try again.";
+      return `Connection timed out. The ProofPath server (${API_BASE_URL}) may be waking from idle. Please try again shortly.`;
     }
     if (err.code === "ERR_NETWORK" || !err.response) {
-      return `Cannot connect to ProofPath API server (${API_BASE_URL}). Please ensure the backend is running and CORS is permitted.`;
+      return `Cannot connect to ProofPath API server (${API_BASE_URL}). The server may be waking up from idle or unreachable. Please try again in a moment.`;
+    }
+    if (err.response?.status && err.response.status >= 502 && err.response.status <= 504) {
+      return `ProofPath server (${API_BASE_URL}) is temporarily unavailable (${err.response.status}). It may be waking up from idle. Please try again in a moment.`;
     }
     if (err.response?.status === 401) {
       return "Session expired or invalid credentials. Please log in again.";

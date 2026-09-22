@@ -151,6 +151,12 @@ export default function LoginPage() {
             <p className="text-[11px] text-center text-slate-500 mt-2">
               Auto-fills: <span className="text-slate-400 font-mono">coordinator@college.edu</span>
             </p>
+
+            <div className="mt-4 pt-3.5 border-t border-[#1F293D]/70 text-center">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                <span className="font-semibold text-slate-300">Institutional Access:</span> Coordinator accounts are provisioned by college placement cell administrators. Students register and verify credentials via the ProofPath Mobile App.
+              </p>
+            </div>
           </div>
         </div>
       </div>

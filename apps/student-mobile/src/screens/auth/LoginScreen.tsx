@@ -78,6 +78,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
 
         <Card style={styles.card}>
+          {/* Auth Mode Switcher */}
+          <View style={styles.authTabs}>
+            <View style={[styles.authTab, styles.authTabActive]}>
+              <Text style={styles.authTabTextActive}>Sign In</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.authTab}
+              onPress={() => navigation.navigate("Register")}
+            >
+              <Text style={styles.authTabText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.cardTitle}>Student Sign In</Text>
 
           {error && <ErrorBanner message={error} />}
@@ -185,6 +198,36 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 24,
+  },
+  authTabs: {
+    flexDirection: "row",
+    backgroundColor: colors.bgDark,
+    borderRadius: 10,
+    padding: 4,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: colors.borderDark,
+  },
+  authTab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: "center",
+    borderRadius: 8,
+  },
+  authTabActive: {
+    backgroundColor: "rgba(124, 58, 237, 0.2)",
+    borderColor: colors.primary,
+    borderWidth: 1,
+  },
+  authTabText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textMuted,
+  },
+  authTabTextActive: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.textPrimary,
   },
   cardTitle: {
     fontSize: 18,
