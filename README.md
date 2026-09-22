@@ -1,95 +1,194 @@
 # ProofPath
 
-> **"Don't just claim your skills. Prove them."**
+> "Don't just claim your skills. Prove them."
 
-ProofPath is an evidence-based campus placement verification platform designed to validate student technical skills through verifiable artifacts, deterministic evaluation rules, and practical assessments rather than self-reported resume claims.
+ProofPath is an evidence-based campus placement verification platform connecting student skill claims with verifiable artifacts, practical assessments, and deterministic placement matching.
 
----
+### Try the Prototype
 
-## Live Demo
+[Download Android App →](https://expo.dev/artifacts/eas/8OYDsfi2TBhA-N2WwNpgR6XuIxeegEAB6RACLoJ6HUM.apk)
 
-* **Placement Cell Dashboard:**  
-  [https://proof-path-1r11ia88r-proof-path2.vercel.app](https://proof-path-1r11ia88r-proof-path2.vercel.app)
+[Open Placement Dashboard →](https://proof-path-1r11ia88r-proof-path2.vercel.app)
 
-The web dashboard is the **College Placement Cell Dashboard** used by placement coordinators and TPOs to verify evidence, set company criteria, execute deterministic matching, and export candidate shortlists.
+[View Source on GitHub →](https://github.com/GitCrafted-1806/ProofPath)
 
----
+### Demo Credentials
 
-## Student Android App
-
-* **Latest APK Download:**  
-  [https://expo.dev/artifacts/eas/8OYDsfi2TBhA-N2WwNpgR6XuIxeegEAB6RACLoJ6HUM.apk](https://expo.dev/artifacts/eas/8OYDsfi2TBhA-N2WwNpgR6XuIxeegEAB6RACLoJ6HUM.apk)
-
-The APK is the **Student Mobile Application** used by students to manage their profile, upload evidence, link GitHub project repositories, complete practical assessments, and view their public verification profile.
+| Role | Interface | Email | Password |
+| :--- | :--- | :--- | :--- |
+| **Student** | Android Mobile App | `john.doe@nit.edu` | `Password123!` |
+| **Placement Cell** | Web Dashboard | `coordinator@college.edu` | `Password123!` |
 
 ---
 
-## Demo Credentials
+## Quick Evaluation
 
-> **Note:** These are pre-seeded demo accounts ready for evaluation without any registration needed.
+Follow these steps to evaluate the live prototype end-to-end:
 
-* **Placement Cell (Coordinator):**
-  * **Email:** `coordinator@college.edu`
-  * **Password:** `Password123!`
+### Student App (Android)
+1. Download and install the APK on an Android device or emulator.
+2. Log in as John Doe (`john.doe@nit.edu` / `Password123!`).
+3. Open **Skills** &rarr; select **Python**.
+4. Tap **Connect & Select GitHub Project**.
+5. Select the prepared demo repository (`octocat-dev/analytics-pipeline`).
+6. Complete the practical assessment under **Assessments**.
+7. Open the **Verification Profile** to view the verified credential.
 
-* **Student:**
-  * **Email:** `john.doe@nit.edu`
-  * **Password:** `Password123!`
-
----
-
-## Recommended Jury Walkthrough
-
-1. **Open the Student Android App** on an Android phone (or emulator).
-2. **Login as John Doe** (`john.doe@nit.edu` / `Password123!`).
-3. **View the student dashboard** and claimed skills overview.
-4. **Open a skill** (e.g., Python, Pandas, or Matplotlib) from the Skills tab to view its verification criteria.
-5. **Connect/select the GitHub project** (`octocat-dev/analytics-pipeline`) to satisfy project evidence.
-6. **Complete the practical assessment** for the skill.
-7. **View the resulting deterministic verification status** (transiting to *Skill Assessed* or *Skill Verified*).
-8. **Open the verification profile** (view the verifiable credential profile).
-9. **Sign out** from the profile screen.
-10. **Open the Placement Cell Dashboard** via the web link above.
-11. **Login as the coordinator** (`coordinator@college.edu` / `Password123!`).
-12. **Open Student Directory** and search for candidates.
-13. **View John Doe's profile**, inspecting evidence files, GitHub repos, and skill verification states.
-14. **Create or view a placement requirement** with eligible branches, minimum CGPA, and required skill levels.
-15. **Demonstrate deterministic eligibility matching** (strict pass/fail rule evaluation without arbitrary scoring).
-16. **Demonstrate assessment request / CSV export** for placement operations.
+### Placement Cell (Web Dashboard)
+1. Open the web dashboard.
+2. Log in as placement coordinator (`coordinator@college.edu` / `Password123!`).
+3. Open **Student Directory**.
+4. Select **John Doe** to inspect submitted evidence, linked repositories, and verified skills.
+5. Navigate to **Requirements** &rarr; select a placement requirement defined by the placement cell.
+6. Run placement matching to view the deterministic eligibility result.
 
 ---
 
-## Product Rules
+## What is ProofPath?
 
-* **Exactly Two Interfaces:** Dedicated **Student Mobile App** (React Native / Expo) and **College Placement Cell Dashboard** (Next.js web).
-* **MVP Skills:** Python, Pandas, Matplotlib, Git/GitHub.
-* **4 Verification Levels:**
-  1. `UNVERIFIED`: Self-reported claim only.
-  2. `EVIDENCE_SUPPORTED`: Verified certificate, project document, or GitHub repo attached.
-  3. `SKILL_ASSESSED`: Passing score on practical skill assessment.
-  4. `SKILL_VERIFIED`: Full multi-factor criteria met (evidence + practical assessment + code explanation / TPO verification).
-* **Deterministic Rules Engine:** Final verification status is strictly determined by deterministic backend business logic.
-* **No Direct AI Decision:** AI does not directly decide the final verification status; all verification is verifiable and rule-governed.
-* **Strict Non-Ranking Rule:** Zero overall student ranking, leaderboard points, or arbitrary candidate scores.
-* **GitHub Project Evidence:** GitHub is the authentic software-project evidence source.
+On traditional campus placement portals, students claim proficiency by listing unverified keywords on resumes. Placement cells have no reliable way to verify whether a student can write code, work with core libraries, or build functional projects until interviews take place.
+
+ProofPath replaces self-declared keywords with an evidence pipeline:
+
+$$\text{Skill Claim} \longrightarrow \text{Evidence} \longrightarrow \text{GitHub Project} \longrightarrow \text{Practical Assessment} \longrightarrow \text{Verification}$$
+
+Once skills are verified through multi-factor criteria, the placement cell defines placement requirements (eligible branches, minimum CGPA, required verified skills) and runs deterministic eligibility matching. Students who meet the criteria are identified transparently without arbitrary leaderboard ranking.
 
 ---
 
-## Architecture
+## Product Workflow
 
-* **Student Mobile App:** React Native + Expo + TypeScript
-* **Placement Dashboard:** Next.js + TypeScript
-* **Backend:** FastAPI + Python
-* **Database:** PostgreSQL / Supabase in production; SQLite for local development
-* **Deployment Pipeline:** Vercel (Web Dashboard) → Render (FastAPI Backend) → Supabase (Production DB)
+```mermaid
+flowchart TD
+    subgraph Student Journey
+        A[Claim Skill] --> B[Upload Coursework / Certificate]
+        B --> C[Connect & Select GitHub Project]
+        C --> D[Take Practical Assessment]
+        D --> E[Skill Verified Credential]
+    end
+
+    subgraph Placement Cell Journey
+        F[Define Placement Requirements] --> G[Review Student Evidence & Status]
+        G --> H[Deterministic Eligibility Matching]
+        H --> I[Shortlist Export]
+    end
+
+    E -. Verifiable State .-> G
+```
 
 ---
 
-## Security & Privacy
+## Verification Model
 
-* **JWT Authentication:** Cryptographically signed stateless access tokens for all authenticated routes.
-* **Role-Based Access Control (RBAC):** Strict isolation between `STUDENT` and `PLACEMENT_COORDINATOR` roles.
-* **Student Ownership Isolation:** Students can access and modify only their own data; cross-student modifications are blocked with HTTP 403 Forbidden.
-* **Private Backend & Database:** Uploaded evidence stored privately on disk with strict authorization gates.
-* **No Secrets Committed:** Zero secrets or API keys committed to GitHub.
-* **Deterministic Verification Rules:** Predictable, transparent verification rules ensuring placement trust and auditability.
+ProofPath organizes each technical skill through four verification levels:
+
+1. **`UNVERIFIED`**: The skill is claimed by the student during onboarding without supporting artifacts.
+2. **`EVIDENCE_SUPPORTED`**: The student has attached an uploaded certificate, project documentation, or linked a relevant GitHub repository.
+3. **`SKILL_ASSESSED`**: The student has completed a timed practical assessment demonstrating syntax and problem-solving.
+4. **`SKILL_VERIFIED`**: Full verification criteria are met: supporting evidence attached, practical assessment passed, and repository linkage confirmed.
+
+> **Important:** The final verification state is determined by deterministic backend rules. AI does not directly decide the final verification status.
+
+---
+
+## MVP Skills
+
+ProofPath focuses on 4 foundational technical competencies for campus recruitment:
+
+* **Python**: Core programming, control structures, object-oriented concepts, and algorithms.
+* **Pandas**: Data manipulation, DataFrame querying, cleaning, and transformation.
+* **Matplotlib**: Statistical plotting, custom visualization, subplots, and chart configuration.
+* **Git/GitHub**: Branching, version control workflows, commit tracking, and repository architecture.
+
+---
+
+## Two Interfaces
+
+ProofPath intentionally provides exactly two coordinated interfaces:
+
+1. **Student Mobile Application** (Android): Built for personal skill progression, document upload, project linkage, and assessment taking.
+2. **College Placement Cell Dashboard** (Web): Built for institutional coordinators to inspect evidence, establish placement requirements, match candidates, and export verified shortlists.
+
+*Note: There is intentionally no recruiter or company portal in this prototype. ProofPath is designed specifically for the college placement office and student body.*
+
+---
+
+## Demo Environment
+
+The deployed prototype runs in `DEMO_MODE` to provide evaluators with a consistent, reliable walkthrough without requiring external third-party service configurations.
+
+The prepared demo account uses ProofPath's demo GitHub integration. Evaluators should use the supplied demo account rather than attempting to connect a personal GitHub account.
+
+---
+
+## Technical Overview
+
+* **Student Mobile App:** React Native, Expo SDK 57, TypeScript
+* **Placement Cell Dashboard:** Next.js (App Router), React 19, TypeScript, Tailwind CSS
+* **Backend Service:** FastAPI, Python 3.12, Pydantic v2, SQLAlchemy 2.0
+* **Database:** PostgreSQL (Supabase production), SQLite (local development)
+* **Hosting:** Vercel (Web Dashboard), Render (FastAPI Backend), Supabase (Database)
+* **Automated Tests:** 106 automated backend tests (pytest), TypeScript typechecks, and end-to-end integration suites
+
+---
+
+## Security and Privacy
+
+* **JWT Authentication:** Stateless session management with role claims.
+* **Role-Based Access Control (RBAC):** Strict separation between student and placement coordinator routes.
+* **Student Ownership Isolation:** Students can only view and modify their own evidence; cross-student modifications are blocked.
+* **Private Artifact Storage:** Uploaded evidence is stored in private storage with authenticated streaming downloads.
+* **No Secrets Committed:** Sensitive tokens, keys, and database passwords are managed exclusively through environment variables.
+* **Deterministic Rules:** Transparent, auditable state transitions without hidden heuristics.
+
+---
+
+## Repository Structure
+
+```
+ProofPath/
+├── apps/
+│   ├── student-mobile/
+│   └── placement-web/
+├── services/
+│   └── api/
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+---
+
+## For Developers
+
+Developer setup is optional and not required to evaluate the live prototype.
+
+### Local Backend Setup
+```bash
+cd services/api
+python -m venv venv
+
+# Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Linux / macOS
+source venv/bin/activate
+
+pip install -r requirements.txt
+pytest
+uvicorn main:app --reload --port 8000
+```
+
+### Local Placement Web Setup
+```bash
+cd apps/placement-web
+npm install
+npm run dev
+```
+
+### Local Student Mobile Setup
+```bash
+cd apps/student-mobile
+npm install
+npx expo start
+```
