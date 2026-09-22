@@ -6,7 +6,7 @@ ProofPath is an evidence-based campus placement verification platform connecting
 
 ### Try the Prototype
 
-[Download Android App →](https://expo.dev/artifacts/eas/8OYDsfi2TBhA-N2WwNpgR6XuIxeegEAB6RACLoJ6HUM.apk)
+[Download Android App →](https://expo.dev/artifacts/eas/ExorwHRXrvUI4x5uEKeMVZ9v9DDPA6qW4zZmak5YgiU.apk)
 
 [Open Placement Dashboard →](https://proof-path-1r11ia88r-proof-path2.vercel.app)
 
