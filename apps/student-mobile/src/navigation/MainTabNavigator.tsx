@@ -33,6 +33,7 @@ function SkillsStackNavigator() {
     >
       <Stack.Screen name="SkillsMain" component={SkillsScreen} />
       <Stack.Screen name="SkillDetail" component={SkillDetailScreen} />
+      <Stack.Screen name="GitHub" component={GitHubScreen} />
       <Stack.Screen name="VerificationProfile" component={VerificationProfileScreen} />
     </Stack.Navigator>
   );
